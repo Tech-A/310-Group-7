@@ -1,6 +1,10 @@
-import ApplicationCard from './ApplicationCard'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import SortableApplicationCard from './SortableApplicationCard'
 
-function StatusColumn({ title, tone, applications }) {
+function StatusColumn({ id, title, tone, applications }) {
+  const { setNodeRef } = useDroppable({ id })
+
   return (
     <section className={`${tone} flex min-h-0 flex-col rounded-[1.35rem] p-4`}>
       <header className="mb-7 flex items-center justify-between px-1">
@@ -17,11 +21,13 @@ function StatusColumn({ title, tone, applications }) {
         </span>
       </header>
 
-      <div className="space-y-3">
-        {applications.map((application) => (
-          <ApplicationCard key={application.id} {...application} />
-        ))}
-      </div>
+      <SortableContext items={applications.map((application) => application.id)} strategy={verticalListSortingStrategy}>
+        <div ref={setNodeRef} className="min-h-full flex-1 space-y-3 overflow-y-auto">
+          {applications.map((application) => (
+            <SortableApplicationCard key={application.id} application={application} />
+          ))}
+        </div>
+      </SortableContext>
     </section>
   )
 }
