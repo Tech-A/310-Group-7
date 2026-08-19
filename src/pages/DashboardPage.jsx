@@ -1,16 +1,119 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import beaver from '../assets/beaver.png'
 import beaverArms from '../assets/beaverArms.png'
 import grassDouble from '../assets/grassDouble.svg'
+import ApplicationCard from '../components/ApplicationCard'
+import ApplicationModal from '../components/ApplicationModal'
 import Sidebar from '../components/Sidebar'
 import StatusColumn from '../components/StatusColumn'
-import ApplicationModal from '../components/ApplicationModal'
-import { INITIAL_COLUMNS } from './dashboardData'
+import { COLUMNS, INITIAL_ITEMS } from './dashboardData'
 
 const BEAVER_POSITION = 'pointer-events-none absolute left-[35%] top-14 w-31'
+const STORAGE_KEY = 'kanban-board-items'
+const NEW_APPLICATION_COLUMN = COLUMNS[0].title
+
+function loadStoredItems() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored ? JSON.parse(stored) : INITIAL_ITEMS
+  } catch {
+    return INITIAL_ITEMS
+  }
+}
+
+function findContainer(items, id) {
+  if (id in items) return id
+  return Object.keys(items).find((key) => items[key].some((item) => item.id === id))
+}
 
 function DashboardPage() {
+  const [items, setItems] = useState(loadStoredItems)
+  const [activeApplication, setActiveApplication] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  }, [items])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  function handleDragStart(event) {
+    const container = findContainer(items, event.active.id)
+    setActiveApplication(items[container]?.find((item) => item.id === event.active.id) ?? null)
+  }
+
+  function handleDragOver(event) {
+    const { active, over } = event
+    if (!over) return
+
+    const activeContainer = findContainer(items, active.id)
+    const overContainer = findContainer(items, over.id)
+
+    if (!activeContainer || !overContainer || activeContainer === overContainer) return
+
+    setItems((prev) => {
+      const activeItems = prev[activeContainer]
+      const overItems = prev[overContainer]
+      const activeIndex = activeItems.findIndex((item) => item.id === active.id)
+      const overIndex = overItems.findIndex((item) => item.id === over.id)
+      const newIndex = overIndex >= 0 ? overIndex : overItems.length
+
+      return {
+        ...prev,
+        [activeContainer]: activeItems.filter((item) => item.id !== active.id),
+        [overContainer]: [
+          ...overItems.slice(0, newIndex),
+          activeItems[activeIndex],
+          ...overItems.slice(newIndex),
+        ],
+      }
+    })
+  }
+
+  function handleDragEnd(event) {
+    const { active, over } = event
+    setActiveApplication(null)
+    if (!over) return
+
+    const activeContainer = findContainer(items, active.id)
+    const overContainer = findContainer(items, over.id)
+    if (!activeContainer || !overContainer) return
+
+    const activeIndex = items[activeContainer].findIndex((item) => item.id === active.id)
+    const overIndex = items[overContainer].findIndex((item) => item.id === over.id)
+
+    if (activeContainer === overContainer && activeIndex !== overIndex) {
+      setItems((prev) => ({
+        ...prev,
+        [overContainer]: arrayMove(prev[overContainer], activeIndex, overIndex),
+      }))
+    }
+  }
+
+  function handleAddApplication(application) {
+    const id = `${application.company}-${application.role}-${Date.now()}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+
+    setItems((prev) => ({
+      ...prev,
+      [NEW_APPLICATION_COLUMN]: [...prev[NEW_APPLICATION_COLUMN], { id, ...application }],
+    }))
+    setIsModalOpen(false)
+  }
 
   return (
     <main className="h-screen min-w-[75rem] overflow-hidden bg-brand-bg p-4 text-brand-black">
@@ -41,11 +144,33 @@ function DashboardPage() {
             className={`${BEAVER_POSITION} z-0`}
           />
 
-          <div className="relative z-10 grid flex-1 grid-cols-4 gap-4 overflow-hidden">
-            {INITIAL_COLUMNS.map((column) => (
-              <StatusColumn key={column.title} {...column} />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="relative z-10 grid flex-1 grid-cols-4 gap-4 overflow-hidden">
+              {COLUMNS.map((column) => (
+                <StatusColumn
+                  key={column.title}
+                  id={column.title}
+                  title={column.title}
+                  tone={column.tone}
+                  applications={items[column.title]}
+                />
+              ))}
+            </div>
+
+            <DragOverlay>
+              {activeApplication ? (
+                <div className="rotate-2">
+                  <ApplicationCard {...activeApplication} />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
 
           <img
             src={beaverArms}
@@ -66,11 +191,7 @@ function DashboardPage() {
       <ApplicationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={(application) => {
-          console.log(application)
-          // TODO: NEED TO ADD APPLICATION CARD WHEN USER CLICKS SUBMIT
-          setIsModalOpen(false)
-        }}
+        onSubmit={handleAddApplication}
       />
     </main>
   )
