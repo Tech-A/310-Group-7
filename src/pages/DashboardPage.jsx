@@ -16,20 +16,12 @@ import ApplicationCard from '../components/ApplicationCard'
 import ApplicationModal from '../components/ApplicationModal'
 import Sidebar from '../components/Sidebar'
 import StatusColumn from '../components/StatusColumn'
-import { COLUMNS, INITIAL_ITEMS } from './dashboardData'
+import { fetchApplicationsByColumn, insertApplication, updateApplicationPositions } from '../lib/applications'
+import { COLUMNS } from './dashboardData'
 
 const BEAVER_POSITION = 'pointer-events-none absolute left-[35%] top-14 w-31'
-const STORAGE_KEY = 'kanban-board-items'
 const NEW_APPLICATION_COLUMN = COLUMNS[0].title
-
-function loadStoredItems() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return stored ? JSON.parse(stored) : INITIAL_ITEMS
-  } catch {
-    return INITIAL_ITEMS
-  }
-}
+const EMPTY_ITEMS = COLUMNS.reduce((acc, column) => ({ ...acc, [column.title]: [] }), {})
 
 function findContainer(items, id) {
   if (id in items) return id
@@ -37,13 +29,31 @@ function findContainer(items, id) {
 }
 
 function DashboardPage() {
-  const [items, setItems] = useState(loadStoredItems)
+  const [items, setItems] = useState(EMPTY_ITEMS)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
   const [activeApplication, setActiveApplication] = useState(null)
+  const [dragStartContainer, setDragStartContainer] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-  }, [items])
+    let cancelled = false
+
+    fetchApplicationsByColumn(COLUMNS)
+      .then((grouped) => {
+        if (!cancelled) setItems(grouped)
+      })
+      .catch((error) => {
+        if (!cancelled) setLoadError(error)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -52,6 +62,7 @@ function DashboardPage() {
 
   function handleDragStart(event) {
     const container = findContainer(items, event.active.id)
+    setDragStartContainer(container)
     setActiveApplication(items[container]?.find((item) => item.id === event.active.id) ?? null)
   }
 
@@ -86,6 +97,8 @@ function DashboardPage() {
   function handleDragEnd(event) {
     const { active, over } = event
     setActiveApplication(null)
+    const startContainer = dragStartContainer
+    setDragStartContainer(null)
     if (!over) return
 
     const activeContainer = findContainer(items, active.id)
@@ -95,23 +108,38 @@ function DashboardPage() {
     const activeIndex = items[activeContainer].findIndex((item) => item.id === active.id)
     const overIndex = items[overContainer].findIndex((item) => item.id === over.id)
 
+    let nextItems = items
     if (activeContainer === overContainer && activeIndex !== overIndex) {
-      setItems((prev) => ({
-        ...prev,
-        [overContainer]: arrayMove(prev[overContainer], activeIndex, overIndex),
-      }))
+      nextItems = {
+        ...items,
+        [overContainer]: arrayMove(items[overContainer], activeIndex, overIndex),
+      }
+      setItems(nextItems)
+    }
+
+    updateApplicationPositions(overContainer, nextItems[overContainer]).catch((error) =>
+      console.error('Failed to save card position', error),
+    )
+    if (startContainer && startContainer !== overContainer) {
+      updateApplicationPositions(startContainer, nextItems[startContainer]).catch((error) =>
+        console.error('Failed to save card position', error),
+      )
     }
   }
 
   function handleAddApplication(application) {
-    const id = `${application.company}-${application.role}-${Date.now()}`
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
+    const status = NEW_APPLICATION_COLUMN
+    const position = items[status].length
 
-    setItems((prev) => ({
-      ...prev,
-      [NEW_APPLICATION_COLUMN]: [...prev[NEW_APPLICATION_COLUMN], { id, ...application }],
-    }))
+    insertApplication({ ...application, status, position })
+      .then((created) => {
+        setItems((prev) => ({
+          ...prev,
+          [status]: [...prev[status], created],
+        }))
+      })
+      .catch((error) => console.error('Failed to add application', error))
+
     setIsModalOpen(false)
   }
 
@@ -127,6 +155,10 @@ function DashboardPage() {
                 Hello, Stranger<span aria-hidden="true">✦</span>
               </h1>
               <p className="mt-1 text-base">Welcome to your internship dashboard</p>
+              {isLoading && <p className="mt-1 text-xs text-brand-black/60">Loading your applications…</p>}
+              {loadError && (
+                <p className="mt-1 text-xs text-red-600">Couldn't load applications. Try refreshing.</p>
+              )}
             </div>
             <button
               type="button"
