@@ -14,7 +14,7 @@ This does **not** yet scope data to a logged-in user — see [Known follow-ups](
 
 ## Supabase setup
 
-This project uses an existing `applications` table (`id`, `user_id`, `company_name`, `role`, `due_date`, `status`, `position`, `created_at`, `updated_at`). It has no `location` column, so add one, and relax the `user_id`/RLS enforcement for now since real login/signup is being built separately (see `docs/auth-pages.md` — still UI-only stubs as of this writing) and there's no session yet to satisfy it:
+This project uses an existing `applications` table (`id`, `user_id`, `company_name`, `role`, `due_date` (`date`), `status`, `position`, `created_at`, `updated_at`). `status` has a CHECK constraint limited to `to_apply` / `applied` / `interview` / `offer` / `rejected` — it doesn't match the board's column titles (`To apply`, `Applied / Waiting`, etc.), so `src/lib/applications.js` maps between them (`rejected` has no corresponding column and is currently just not shown anywhere). The table has no `location` column, so add one, and relax the `user_id`/RLS enforcement for now since real login/signup is being built separately (see `docs/auth-pages.md` — still UI-only stubs as of this writing) and there's no session yet to satisfy it:
 
 ```sql
 alter table applications add column location text;
@@ -39,8 +39,8 @@ Both come from the Supabase dashboard under Settings → API.
   Thin wrapper around `ApplicationCard` that calls `@dnd-kit/sortable`'s `useSortable` and applies the drag transform/listeners to a wrapping `<div>`. Keeps `ApplicationCard` itself purely presentational — it has no drag-related props.
 
 - **`src/lib/applications.js`**
-  Supabase data-access layer for the board. Maps between the DB's column names (`company_name`) and the UI's shape (`company`, camelCase `dueDate`, etc.):
-  - `fetchApplicationsByColumn(columns)` — loads all rows and groups them by `status` into the `{ columnTitle: [applications] }` shape the board uses.
+  Supabase data-access layer for the board. Maps between the DB's column names/values (`company_name`, `status` as `to_apply`/`applied`/`interview`/`offer`) and the UI's shape (`company`, camelCase `dueDate`, column titles like `To apply`), via a `STATUS_BY_COLUMN` lookup:
+  - `fetchApplicationsByColumn(columns)` — loads all rows and groups them by `status` (translated to column title) into the `{ columnTitle: [applications] }` shape the board uses.
   - `insertApplication(data)` — inserts a new row, returns it mapped to the UI's `{ id, company, location, role, dueDate }` shape. Doesn't set `user_id` — see [Supabase setup](#supabase-setup).
   - `updateApplicationPositions(status, applications)` — persists `status`/`position` for a column's cards after a drag (one `update` per row).
 

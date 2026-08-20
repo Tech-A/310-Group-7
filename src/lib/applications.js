@@ -1,5 +1,18 @@
 import { supabase } from './supabaseClient'
 
+// DB `status` is constrained to this fixed set (see the `applications_status_check`
+// constraint) — it doesn't match the board's column titles, so map between them.
+const STATUS_BY_COLUMN = {
+  'To apply': 'to_apply',
+  'Applied / Waiting': 'applied',
+  Interview: 'interview',
+  Offer: 'offer',
+}
+
+const COLUMN_BY_STATUS = Object.fromEntries(
+  Object.entries(STATUS_BY_COLUMN).map(([column, status]) => [status, column]),
+)
+
 function toApplication(row) {
   return {
     id: row.id,
@@ -19,7 +32,9 @@ export async function fetchApplicationsByColumn(columns) {
   if (error) throw error
 
   return columns.reduce((grouped, column) => {
-    grouped[column.title] = data.filter((row) => row.status === column.title).map(toApplication)
+    grouped[column.title] = data
+      .filter((row) => COLUMN_BY_STATUS[row.status] === column.title)
+      .map(toApplication)
     return grouped
   }, {})
 }
@@ -27,7 +42,14 @@ export async function fetchApplicationsByColumn(columns) {
 export async function insertApplication({ company, location, role, dueDate, status, position }) {
   const { data, error } = await supabase
     .from('applications')
-    .insert({ company_name: company, location, role, due_date: dueDate, status, position })
+    .insert({
+      company_name: company,
+      location,
+      role,
+      due_date: dueDate,
+      status: STATUS_BY_COLUMN[status],
+      position,
+    })
     .select()
     .single()
 
@@ -36,9 +58,10 @@ export async function insertApplication({ company, location, role, dueDate, stat
 }
 
 export async function updateApplicationPositions(status, applications) {
+  const dbStatus = STATUS_BY_COLUMN[status]
   const results = await Promise.all(
     applications.map((application, index) =>
-      supabase.from('applications').update({ status, position: index }).eq('id', application.id),
+      supabase.from('applications').update({ status: dbStatus, position: index }).eq('id', application.id),
     ),
   )
 
