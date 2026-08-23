@@ -9,6 +9,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import confetti from 'canvas-confetti'
 import beaver from '../assets/beaver.png'
 import beaverArms from '../assets/beaverArms.png'
 import grassDouble from '../assets/grassDouble.svg'
@@ -27,11 +28,26 @@ import { COLUMNS } from './dashboardData'
 
 const BEAVER_POSITION = 'pointer-events-none absolute left-[35%] top-14 hidden w-31 xl:block'
 const NEW_APPLICATION_COLUMN = COLUMNS[0].title
+const OFFER_COLUMN = 'Offer'
+const CONFETTI_COLORS = ['#F5E0AE', '#A6C2D2', '#D9BFB1', '#B8D2C7']
 const EMPTY_ITEMS = COLUMNS.reduce((acc, column) => ({ ...acc, [column.title]: [] }), {})
 
 function findContainer(items, id) {
   if (id in items) return id
   return Object.keys(items).find((key) => items[key].some((item) => item.id === id))
+}
+
+function celebrateOffer() {
+  const fire = (options) =>
+    confetti({
+      origin: { y: 0.65 },
+      colors: CONFETTI_COLORS,
+      disableForReducedMotion: true,
+      ...options,
+    })
+
+  fire({ particleCount: 60, spread: 55, angle: 60, origin: { x: 0.75, y: 0.65 } })
+  fire({ particleCount: 60, spread: 55, angle: 120, origin: { x: 0.75, y: 0.65 } })
 }
 
 function DashboardPage() {
@@ -131,6 +147,8 @@ function DashboardPage() {
       updateApplicationPositions(startContainer, nextItems[startContainer]).catch((error) =>
         console.error('Failed to save card position', error),
       )
+
+      if (overContainer === OFFER_COLUMN) celebrateOffer()
     }
   }
 
