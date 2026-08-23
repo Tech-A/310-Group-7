@@ -58,6 +58,11 @@ export async function insertApplication({ company, location, role, dueDate, stat
   return toApplication(data)
 }
 
+export async function deleteApplication(id) {
+  const { error } = await supabase.from('applications').delete().eq('id', id)
+  if (error) throw error
+}
+
 export async function updateApplicationPositions(status, applications) {
   const dbStatus = STATUS_BY_COLUMN[status]
   const results = await Promise.all(

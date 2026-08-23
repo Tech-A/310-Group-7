@@ -1,9 +1,11 @@
 function ApplicationCard({
+  id,
   company,
   location,
   role,
   dueDate,
   logo,
+  onDelete,
 }) {
   const initials = company
     .split(' ')
@@ -37,8 +39,27 @@ function ApplicationCard({
 
       <p className="mt-3 truncate text-xs font-medium">{role}</p>
 
-      <footer className="mt-2 text-[0.6875rem] text-brand-black/55">
+      <footer className="mt-2 flex items-center justify-between text-[0.6875rem] text-brand-black/55">
         <span>Due {dueDate}</span>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(id)}
+            onPointerDown={(event) => event.stopPropagation()}
+            className="cursor-pointer text-brand-black/35 transition-colors hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-black"
+            aria-label={`Remove ${company} application`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="size-4" aria-hidden="true">
+              <path
+                d="M5 7h14M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7m-7 0 .6 12.02A2 2 0 0 0 9.6 21h4.8a2 2 0 0 0 2-1.98L17 7"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
       </footer>
     </article>
   )

@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import ApplicationCard from './ApplicationCard'
 
-function SortableApplicationCard({ application }) {
+function SortableApplicationCard({ application, onDelete }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: application.id,
   })
@@ -15,7 +15,7 @@ function SortableApplicationCard({ application }) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-none">
-      <ApplicationCard {...application} />
+      <ApplicationCard {...application} onDelete={onDelete} />
     </div>
   )
 }

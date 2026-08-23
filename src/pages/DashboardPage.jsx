@@ -16,7 +16,12 @@ import ApplicationCard from '../components/ApplicationCard'
 import ApplicationModal from '../components/ApplicationModal'
 import Sidebar from '../components/Sidebar'
 import StatusColumn from '../components/StatusColumn'
-import { fetchApplicationsByColumn, insertApplication, updateApplicationPositions } from '../lib/applications'
+import {
+  deleteApplication,
+  fetchApplicationsByColumn,
+  insertApplication,
+  updateApplicationPositions,
+} from '../lib/applications'
 import useAuth from '../context/useAuth'
 import { COLUMNS } from './dashboardData'
 
@@ -145,6 +150,18 @@ function DashboardPage() {
     setIsModalOpen(false)
   }
 
+  function handleDeleteApplication(id) {
+    const column = findContainer(items, id)
+    if (!column) return
+
+    setItems((prev) => ({
+      ...prev,
+      [column]: prev[column].filter((application) => application.id !== id),
+    }))
+
+    deleteApplication(id).catch((error) => console.error('Failed to delete application', error))
+  }
+
   return (
     <main className="min-h-screen bg-brand-bg p-3 text-brand-black sm:p-4">
       <div className="mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-[100rem] flex-col gap-4 sm:min-h-[calc(100vh-2rem)] md:flex-row md:gap-5">
@@ -193,6 +210,7 @@ function DashboardPage() {
                   title={column.title}
                   tone={column.tone}
                   applications={items[column.title]}
+                  onDeleteApplication={handleDeleteApplication}
                 />
               ))}
             </div>
