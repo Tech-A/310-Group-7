@@ -10,10 +10,12 @@
   --color-brand-pink: #d9bfb1;
   --color-brand-green: #b8d2c7;
   --color-brand-yellow: #f5e0ae;
-  --color-brand-black: #615f5f;
+  --color-brand-black: #353434;
   --color-brand-bg: #f4f4f2;
   --color-link: #81a1b3;
   --color-input-bg: #cfd3d5;
   --color-input-placeholder: #b0b0b0;
   --color-application-modal-black: #353434;
+  --color-error: #a4553f;
+  --color-success: #4d7c5f;
 }

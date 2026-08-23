@@ -54,7 +54,7 @@ Pipeline solves this by tracking internship progress **and** collating important
 
 3. Create a `.env` file in the project root (see `.env.example`) with the required Supabase keys:
 VITE_SUPABASE_URL=your-project-url
-VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 
 > The `.env` file is git-ignored. Never commit secrets. Required keys are submitted separately on Canvas as per the assignment brief.
 
@@ -85,7 +85,7 @@ Pipeline is deployed using [Netlify](https://www.netlify.com/).
 | Build command | `npm run build` |
 | Publish directory | `dist` |
 
-**Environment variables:** set the same keys used locally (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) under **Netlify → Site settings → Environment variables**.
+**Environment variables:** set the same keys used locally (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) under **Netlify → Site settings → Environment variables**.
 
 ## License
 

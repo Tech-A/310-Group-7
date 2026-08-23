@@ -1,5 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 
+
+function capitaliseWords(text){
+      return text.trim().split(" ").filter(Boolean).map((word) => {
+        const bare = word.replace(/[^a-zA-Z]/g, "");
+
+        if (bare.length === 2){
+          return word.toUpperCase(); 
+        }
+
+        const lower = word.toLowerCase(); 
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      })
+      .join(" ");
+    }
+    
 export default function ApplicationModal({ isOpen, onClose, onSubmit }) {
     const dialogRef = useRef(null);
     const [company, setCompany] = useState("");
@@ -35,7 +50,7 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit }) {
         const newErrors = {};
         if (!company.trim()) newErrors.company = "Company is required";
         if (!role.trim()) newErrors.role = "Role is required";
-        if (!dueDate) newErrors.dueDate = "Due date is required";
+        if (!dueDate) newErrors.dueDate = "Due Date is required";
         if(!location) newErrors.location = "Location is required";
         return newErrors;
     }
@@ -46,7 +61,7 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit }) {
         setErrors(newErrors);
         if (Object.keys(newErrors).length > 0) return;
 
-        onSubmit?.({ company: company.trim(), location: location.trim(), role: role.trim(), dueDate });
+        onSubmit?.({ company: company.trim(), location: capitaliseWords(location), role: role.trim(), dueDate });
         setCompany("");
         setLocation(""); 
         setRole("");
@@ -55,13 +70,15 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit }) {
         setErrors({});
     }
 
+    
+
     return (
         <dialog
         ref={dialogRef}
         aria-labelledby="modal-title"
-        className="h-full max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-white/55"
+        className="h-full max-h-none w-full max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-white/55"
         >
-        <div className="flex h-full w-full items-center justify-center p-6">
+        <div className="flex min-h-full w-full items-center justify-center px-3 py-8 sm:p-6">
             <button
             type="button"
             aria-label="Close"
@@ -73,22 +90,22 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit }) {
           <div className="relative z-20 flex items-center justify-center">
             <h2
               id="modal-title"
-              className="text-center text-5xl font-bold tracking-tight text-[#353434]"
+              className="text-center text-3xl font-bold tracking-tight text-[#353434] sm:text-5xl"
             >
               ADD APPLICATION
             </h2>
           </div>
 
-            <div className="relative z-10 -mt-2 rounded-[28px] bg-[#353434] p-8 pt-16 pb-9 font-sans shadow-2xl">
-                <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+            <div className="relative z-10 -mt-1 rounded-[24px] bg-[#353434] px-5 pb-6 pt-12 font-sans shadow-2xl sm:-mt-2 sm:rounded-[28px] sm:p-8 sm:pb-9 sm:pt-16">
+                <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 sm:gap-5">
                 <label className="flex flex-col gap-2">
-                <span className="font-medium text-brand-bg">Company</span>
+                <span className="font-medium text-brand-bg">Company *</span>
                 <input
                   type="text"
-                  placeholder="Company name"
+                  placeholder="Company Name"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="rounded-full bg-input-bg px-5 py-3.5 text-brand-black outline-none placeholder:text-input-placeholder focus-visible:ring-2 focus-visible:ring-brand-yellow"
+                  className="min-w-0 rounded-full bg-input-bg px-5 py-3 text-brand-black outline-none placeholder:text-input-placeholder focus-visible:ring-2 focus-visible:ring-brand-yellow sm:py-3.5"
                 />
                 {errors.company && (
                   <span className="px-2 text-sm text-red-300">{errors.company}</span>
@@ -96,13 +113,13 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit }) {
                 </label>
 
                 <label className="flex flex-col gap-2">
-                <span className="font-medium text-brand-bg">Location</span>
+                <span className="font-medium text-brand-bg">Location *</span>
                 <input
                   type="text"
-                  placeholder="Location"
+                  placeholder="City, Country Code"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="rounded-full bg-input-bg px-5 py-3.5 text-brand-black outline-none placeholder:text-input-placeholder focus-visible:ring-2 focus-visible:ring-brand-yellow"
+                  className="min-w-0 rounded-full bg-input-bg px-5 py-3 text-brand-black outline-none placeholder:text-input-placeholder focus-visible:ring-2 focus-visible:ring-brand-yellow sm:py-3.5"
                 />
                 {errors.location && (
                   <span className="px-2 text-sm text-red-300">{errors.location}</span>
@@ -110,13 +127,13 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit }) {
                 </label>
 
                 <label className="flex flex-col gap-2">
-                <span className="font-medium text-brand-bg">Role</span>
+                <span className="font-medium text-brand-bg">Role *</span>
                 <input
                   type="text"
                   placeholder="Role"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="rounded-full bg-input-bg px-5 py-3.5 text-brand-black outline-none placeholder:text-input-placeholder focus-visible:ring-2 focus-visible:ring-brand-yellow"
+                  className="min-w-0 rounded-full bg-input-bg px-5 py-3 text-brand-black outline-none placeholder:text-input-placeholder focus-visible:ring-2 focus-visible:ring-brand-yellow sm:py-3.5"
                 />
                 {errors.role && (
                   <span className="px-2 text-sm text-red-300">{errors.role}</span>
@@ -124,12 +141,12 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit }) {
                 </label>
 
                 <label className="flex flex-col gap-2">
-                <span className="font-medium text-brand-bg">Due date</span>
+                <span className="font-medium text-brand-bg">Due Date *</span>
                 <input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="rounded-full bg-input-bg px-5 py-3.5 text-brand-black outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow"
+                  className="min-w-0 rounded-full bg-input-bg px-5 py-3 text-brand-black outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow sm:py-3.5"
                 />
                 {errors.dueDate && (
                   <span className="px-2 text-sm text-red-300">{errors.dueDate}</span>
@@ -138,7 +155,7 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit }) {
 
                 <button
                 type="submit"
-                className="mt-2 self-center min-w-[60%] rounded-full bg-brand-yellow px-6 py-3.5 text-lg font-bold text-brand-black transition-colors hover:brightness-95 active:scale-[0.98]"
+                className="mt-2 w-full self-center rounded-full bg-brand-yellow px-6 py-3.5 text-lg font-bold text-brand-black transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow active:scale-[0.98] sm:w-auto sm:min-w-[60%]"
                 >
                 Submit
                 </button>

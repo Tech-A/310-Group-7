@@ -17,9 +17,10 @@ import ApplicationModal from '../components/ApplicationModal'
 import Sidebar from '../components/Sidebar'
 import StatusColumn from '../components/StatusColumn'
 import { fetchApplicationsByColumn, insertApplication, updateApplicationPositions } from '../lib/applications'
+import useAuth from '../context/useAuth'
 import { COLUMNS } from './dashboardData'
 
-const BEAVER_POSITION = 'pointer-events-none absolute left-[35%] top-14 w-31'
+const BEAVER_POSITION = 'pointer-events-none absolute left-[35%] top-14 hidden w-31 xl:block'
 const NEW_APPLICATION_COLUMN = COLUMNS[0].title
 const EMPTY_ITEMS = COLUMNS.reduce((acc, column) => ({ ...acc, [column.title]: [] }), {})
 
@@ -29,6 +30,7 @@ function findContainer(items, id) {
 }
 
 function DashboardPage() {
+  const { user } = useAuth()
   const [items, setItems] = useState(EMPTY_ITEMS)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState(null)
@@ -131,7 +133,7 @@ function DashboardPage() {
     const status = NEW_APPLICATION_COLUMN
     const position = items[status].length
 
-    insertApplication({ ...application, status, position })
+    insertApplication({ ...application, status, position, userId: user.id })
       .then((created) => {
         setItems((prev) => ({
           ...prev,
@@ -144,14 +146,14 @@ function DashboardPage() {
   }
 
   return (
-    <main className="h-screen min-w-[75rem] overflow-hidden bg-brand-bg p-4 text-brand-black">
-      <div className="mx-auto flex h-full max-w-[100rem] gap-5">
+    <main className="min-h-screen bg-brand-bg p-3 text-brand-black sm:p-4">
+      <div className="mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-[100rem] flex-col gap-4 sm:min-h-[calc(100vh-2rem)] md:flex-row md:gap-5">
         <Sidebar />
 
-        <section className="relative isolate flex min-w-0 flex-1 flex-col pl-2">
-          <header className="mb-7 flex items-start justify-between px-2 pt-9">
+        <section className="relative isolate flex min-w-0 flex-1 flex-col md:pl-2">
+          <header className="mb-6 flex flex-col gap-4 px-1 pt-2 sm:flex-row sm:items-start sm:justify-between sm:px-2 md:pt-7 lg:pt-9">
             <div>
-              <h1 className="text-4xl font-bold tracking-tight">
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Hello, Stranger<span aria-hidden="true">✦</span>
               </h1>
               <p className="mt-1 text-base">Welcome to your internship dashboard</p>
@@ -163,7 +165,7 @@ function DashboardPage() {
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="rounded-full bg-brand-black px-9 py-4 text-base text-white"
+              className="w-full rounded-full bg-brand-black px-7 py-3.5 text-base text-white transition hover:brightness-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-black sm:w-auto sm:px-9 sm:py-4"
             >
               + Add application
             </button>
@@ -215,7 +217,7 @@ function DashboardPage() {
             src={grassDouble}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute -bottom-2 right-[25%] z-20 w-44 translate-x-1/2 opacity-80"
+            className="pointer-events-none absolute -bottom-2 right-[25%] z-20 hidden w-44 translate-x-1/2 opacity-80 xl:block"
           />
         </section>
       </div>

@@ -39,7 +39,7 @@ export async function fetchApplicationsByColumn(columns) {
   }, {})
 }
 
-export async function insertApplication({ company, location, role, dueDate, status, position }) {
+export async function insertApplication({ company, location, role, dueDate, status, position, userId }) {
   const { data, error } = await supabase
     .from('applications')
     .insert({
@@ -49,6 +49,7 @@ export async function insertApplication({ company, location, role, dueDate, stat
       due_date: dueDate,
       status: STATUS_BY_COLUMN[status],
       position,
+      user_id: userId,
     })
     .select()
     .single()

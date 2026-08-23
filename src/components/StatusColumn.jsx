@@ -6,7 +6,7 @@ function StatusColumn({ id, title, tone, applications }) {
   const { setNodeRef } = useDroppable({ id })
 
   return (
-    <section className={`${tone} flex min-h-0 flex-col rounded-[1.35rem] p-4`}>
+    <section className={`${tone} flex min-h-56 flex-col rounded-[1.35rem] p-4`}>
       <header className="mb-7 flex items-center justify-between px-1">
         <h2
           className={`flex items-center gap-2 font-medium ${

@@ -1,7 +1,7 @@
 # Auth pages
 
-Login, sign up and password reset. All three are UI only — no Supabase calls
-are wired up yet.
+Login, sign up and password reset. This covers the UI; the auth behaviour
+behind it is in [authentication.md](authentication.md).
 
 ## Routes
 
@@ -9,7 +9,8 @@ are wired up yet.
 | --- | --- | --- |
 | `/` | Login | `src/pages/LoginPage.jsx` |
 | `/signup` | Sign up | `src/pages/SignUpPage.jsx` |
-| `/forgot-password` | Password reset | `src/pages/ForgotPasswordPage.jsx` |
+| `/forgot-password` | Request a reset link | `src/pages/ForgotPasswordPage.jsx` |
+| `/reset-password` | Set a new password | `src/pages/ResetPasswordPage.jsx` |
 
 `/` is login for now. When the landing page lands it takes `/`, and login
 moves to `/login` — one line in `src/App.jsx`, plus the `to` props on the
@@ -39,6 +40,16 @@ the spacing every auth card wants.
 
 **`AuthFooter`** — the "Already have an account? Log in" row. Takes `prompt`,
 `linkText` and `to`.
+
+**`Logo`** — the Pipeline wordmark, shared with the sidebar. `className` sets
+the text size (the wordmark inherits it), `markClassName` the ring; the inner
+dot is a percentage of the ring so they stay in proportion at any size.
+
+**`FormMessage`** — an inline error or success line. Takes `tone`
+(`'error'` by default, or `'success'`) and children. It exists as a component
+rather than a repeated `<p>` because the ARIA role — `alert` for errors,
+`status` for success — is the part four separate pages would forget, and it is
+what makes a screen reader announce the message when it appears.
 
 ## The layering
 
@@ -71,7 +82,8 @@ block (v4 has no JS config file — this is its equivalent). Defining
 `--color-link` there generates `text-link`, `bg-link`, `border-link` and so on.
 
 Use a token when a colour has a role that recurs — `--color-link`,
-`--color-input-bg`. One-off decorative values can stay inline.
+`--color-input-bg`, `--color-error`, `--color-success`. One-off decorative
+values can stay inline.
 
 Poppins is loaded in `index.html` and set as `--font-sans`, so it applies
 everywhere without a `font-sans` class.
@@ -88,13 +100,6 @@ everywhere without a `font-sans` class.
 
 ## Not done yet
 
-- No Supabase calls. Each page has a `handleSubmit` that only calls
-  `event.preventDefault()`.
-- Inputs are uncontrolled — no `useState`, no validation, no error messages, no
-  loading state on the button. Sign up does not check that the two passwords
-  match.
-- The logo is a `<p>Pipeline</p>` placeholder pending the real asset.
-- No responsive pass. The card's `px-22` and the beaver both need attention at
-  narrow widths.
 - `beaver.png` is ~666 KB and `beaverArms.png` ~209 KB, most of the bundle.
   They should be re-exported as SVG like the grass.
+- No automated tests — the project has no test framework yet.

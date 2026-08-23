@@ -2,7 +2,7 @@
 
 Thanks for contributing! This project is developed by team **310-Group-7** and is associated with the University of Auckland **SOFTENG 310** course. These guidelines describe the workflow every contributor is expected to follow.
 
-> Please read this document fully before making your first contribution. The required workflow is marked, and not following it can cost the team marks.
+> Please read this document fully before making your first contribution.
 
 ---
 
@@ -62,7 +62,9 @@ Every change — **code or documentation** — follows this loop:
 3. **Sync and branch.** Update your fork from upstream, then create a feature branch from `main` on **your fork**:
     
     ```bash
-    git fetch upstreamgit checkout maingit rebase upstream/maingit checkout -b <branch-name>
+    git fetch upstream
+    git checkout maingit rebase upstream/main
+    git checkout -b <branch-name>
     ```
     
 4. **Make your changes**, committing in logical steps. Rebase often against `upstream/main` — don't wait until the end.

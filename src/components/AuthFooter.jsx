@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 
 function AuthFooter({ prompt, linkText, to }) {
   return (
-    <div className="flex justify-center gap-1 mb-5">
+    <div className="mb-5 flex flex-wrap justify-center gap-x-1 text-center text-sm sm:text-base">
       <p>{prompt}</p>
       <Link className="text-link underline" to={to}>
         {linkText}

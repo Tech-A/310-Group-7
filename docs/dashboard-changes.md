@@ -2,7 +2,7 @@
 
 ## Summary
 
-A desktop-only internship dashboard has been added based on the supplied design mockup. It uses the same Tailwind theme and decorative artwork as the existing authentication pages.
+A responsive internship dashboard has been added based on the supplied design mockup. It uses the same Tailwind theme and decorative artwork as the existing authentication pages.
 
 ## New files
 
@@ -40,7 +40,9 @@ A desktop-only internship dashboard has been added based on the supplied design 
 
 ## Styling
 
-- The dashboard intentionally supports desktop layouts only and has a minimum width of 1200px.
+- The dashboard uses one workflow column on mobile, two on tablet, and four on large desktop screens.
+- The sidebar becomes a compact top navigation on mobile and returns to a vertical sidebar on desktop.
+- Decorative dashboard artwork is hidden below the large desktop breakpoint to prevent content overlap.
 - Workflow columns use the shared README palette:
   - Blue: `#A6C2D2`
   - Pink: `#D9BFB1`
