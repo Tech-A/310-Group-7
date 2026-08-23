@@ -185,7 +185,7 @@ function DashboardPage() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <div className="relative z-10 grid flex-1 grid-cols-4 gap-4 overflow-hidden">
+            <div className="relative z-10 grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {COLUMNS.map((column) => (
                 <StatusColumn
                   key={column.title}

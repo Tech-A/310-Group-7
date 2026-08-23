@@ -59,8 +59,6 @@ A responsive internship dashboard has been added based on the supplied design mo
 
 ## Remaining work
 
-- Connect successful login to `/dashboard`.
-- Implement Supabase authentication and route protection.
-- Implement the Add application interaction.
-- Load real application data and update column counters.
 - Add automated component and interaction tests when the project adopts a React testing framework.
+
+Login → `/dashboard` connection, route protection, the Add application interaction, and real data loading are covered in `docs/authentication.md`, `docs/application-modal.md`, and `docs/kanban-drag-and-drop.md`.

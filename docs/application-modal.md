@@ -23,7 +23,7 @@
   - Imported and wired up `ApplicationModal`.
   - Added `isModalOpen` state.
   - "+ Add application" button now opens the modal (`cursor-default` placeholder removed).
-  - `onSubmit` currently logs the submitted application to the console — actual state update to add a new application card is still a TODO.
+  - `onSubmit` calls `insertApplication` (see `docs/kanban-drag-and-drop.md`) and appends the created row to the "To apply" column's state.
 
 ## Design notes
 
@@ -32,5 +32,4 @@
 
 ## Known follow-ups
 
-- Submitted applications aren't yet added to the dashboard's column state — currently just logged to console.
 - `dueDate` is stored as `YYYY-MM-DD` (native date input format) — will need formatting when displayed on `ApplicationCard`.
